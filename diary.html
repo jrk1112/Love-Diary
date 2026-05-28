@@ -26,7 +26,7 @@ header{background:var(--card);box-shadow:0 8px 24px rgba(255,141,161,0.1);positi
 textarea{width:100%;height:180px;padding:12px;border:1px solid #eee;border-radius:12px;font-size:14px;resize:none}
 button{background:var(--love);color:#fff;border:none;padding:10px 16px;border-radius:8px;margin-top:10px;cursor:pointer}
 
-/* ========== 日记列表 精致优化 ========== */
+/* 日记列表样式 */
 .diary-item{
   background:#fffafc;
   border-radius:12px;
@@ -70,6 +70,32 @@ button{background:var(--love);color:#fff;border:none;padding:10px 16px;border-ra
 .diary-item .del-btn:hover{
   background:#ff819c;
 }
+
+/* 云端提示样式（与收藏页统一） */
+.cloud-tip{
+  margin-top:20px;
+  background:#fcf3f6;
+  border-radius:20px;
+  padding:12px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.cloud-tip span{
+  font-size:13px;
+  color:#c28698;
+}
+.cloud-tip button{
+  background:#b2d8d8;
+  border:none;
+  padding:6px 14px;
+  border-radius:30px;
+  cursor:pointer;
+  color:#5e5e5e;
+  font-size:12px;
+  width:auto;
+  margin-top:0;
+}
 </style>
 </head>
 <body>
@@ -99,6 +125,11 @@ button{background:var(--love);color:#fff;border:none;padding:10px 16px;border-ra
   <div class="card">
     <div class="title">我的日记</div>
     <div id="list"></div>
+    <!-- 新增云端同步提示 -->
+    <div class="cloud-tip">
+      <span>☁️ 日记已跟随「设置页」坚果云备份同步，永不丢失</span>
+      <button onclick="window.location.href='setting.html'">去云端同步</button>
+    </div>
   </div>
 </div>
 
@@ -137,7 +168,7 @@ function render(){
       h+=`
       <div class="diary-item">
         <div class="text">
-          <div class="content">${item.content}</div>
+          <div class="content">${escapeHtml(item.content)}</div>
           <div class="time">${item.time}</div>
         </div>
         <button class="del-btn" onclick="del(${i})">×</button>
@@ -145,6 +176,15 @@ function render(){
     });
   }
   b.innerHTML=h;
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>]/g, function(m) {
+    if(m === '&') return '&amp;';
+    if(m === '<') return '&lt;';
+    if(m === '>') return '&gt;';
+    return m;
+  });
 }
 
 window.onload=render;

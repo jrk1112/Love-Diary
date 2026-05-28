@@ -69,7 +69,6 @@ header{background:var(--card);box-shadow:var(--shadow);position:sticky;top:0}
 </div>
 
 <script>
-// 底部提示
 function showToast(text, success=true){
   const t=document.getElementById('toast');
   t.innerText=text;
@@ -78,7 +77,6 @@ function showToast(text, success=true){
   setTimeout(()=>t.style.display='none',2200);
 }
 
-// 配置读取
 function getConfig(){return JSON.parse(localStorage.getItem('loveConfig')||'{"loveDate":"2025-01-01"}')}
 function getMemorialList(){return JSON.parse(localStorage.getItem('memorialList')||'[]')}
 
@@ -93,27 +91,9 @@ function runLoveTime(){
   document.getElementById('loveDay').innerText = `已在一起 ${d}天 ${h}时 ${m}分 ${s}秒`;
 }
 
-// ==============================================
-// 🌍 永久自动日历：农历+公历 每年自动同步
-// ==============================================
+// ============= 简化版节日系统 (仅公历固定节日，准确可靠) =============
 function getSolarTerm(year, month, day) {
   return new Date(year, month - 1, day);
-}
-
-function getLunarFestival(year) {
-  const lunar = [
-    { name: "春节", month: 1, day: 1 },
-    { name: "元宵节", month: 1, day: 15 },
-    { name: "端午节", month: 5, day: 5 },
-    { name: "七夕节", month: 7, day: 7 },
-    { name: "中秋节", month: 8, day: 15 },
-    { name: "重阳节", month: 9, day: 9 },
-    { name: "除夕", month: 12, day: 29 }
-  ];
-  return lunar.map(item => ({
-    name: item.name,
-    date: new Date(year, item.month - 1, item.day)
-  }));
 }
 
 function getFixedFestival(year) {
@@ -138,13 +118,11 @@ function getFixedFestival(year) {
 function getAllFestivals() {
   const now = new Date();
   const year = now.getFullYear();
-  const lunar = getLunarFestival(year);
-  const fixed = getFixedFestival(year);
-  const next = getFixedFestival(year + 1);
-  return [...lunar, ...fixed, ...next];
+  const currentYearFest = getFixedFestival(year);
+  const nextYearFest = getFixedFestival(year + 1);
+  return [...currentYearFest, ...nextYearFest];
 }
 
-// 获取最近节日
 function getNearestFestival() {
   const now = new Date();
   const list = getAllFestivals();
@@ -159,7 +137,6 @@ function getNearestFestival() {
   return res || { name: "暂无", days: "--" };
 }
 
-// 获取最近纪念日
 function getNearestMemorial() {
   const now = new Date();
   const list = getMemorialList();
@@ -176,18 +153,16 @@ function getNearestMemorial() {
   return res || { name: "暂无纪念日", days: "--" };
 }
 
-// 更新显示
 function updateCountdown() {
   const f = getNearestFestival();
   document.getElementById("festName").innerText = "🎊 " + f.name;
-  document.getElementById("festDay").innerText = f.days + (f.days === "--" ? "" : " 天");
-
+  document.getElementById("festDay").innerText = f.days === "--" ? "--" : f.days + " 天";
   const m = getNearestMemorial();
   document.getElementById("memName").innerText = "💝 " + m.name;
-  document.getElementById("memDay").innerText = m.days + (m.days === "--" ? "" : " 天");
+  document.getElementById("memDay").innerText = m.days === "--" ? "--" : m.days + " 天";
 }
 
-// 启动
+// 实时更新时间
 setInterval(runLoveTime, 1000);
 runLoveTime();
 updateCountdown();

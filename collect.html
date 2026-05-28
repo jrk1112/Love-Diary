@@ -3,26 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>私人收藏</title>
+<title>私人收藏 · 心动集</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC,Microsoft YaHei,sans-serif}
 :root{--love:#ff8da1;--bg:#fffafc;--card:#fff}
-body{background:var(--bg)}
+body{background:var(--bg);padding-bottom:70px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 22px;border-radius:20px;font-size:14px;z-index:9999;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.toast.success{background:#fff;color:#2a9e76;border:1px solid #d1f0e3}
+.toast.error{background:#fff;color:#e65353;border:1px solid #ffe0e0}
 header{background:var(--card);box-shadow:0 8px 24px rgba(255,141,161,0.1);position:sticky;top:0}
 .nav{max-width:1000px;margin:0 auto;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
 .logo{font-size:1.5rem;color:var(--love);font-weight:bold}
 .menu a{margin-left:1.5rem;color:#666;text-decoration:none}
 .menu a:hover{color:var(--love)}
-.container{max-width:1000px;margin:2rem auto;padding:0 1.5rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-.item{background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(255,141,161,0.1)}
-.item h3{color:var(--love);margin-bottom:10px}
+.container{max-width:700px;margin:2rem auto;padding:0 1.5rem}
+.card{background:#fff;border-radius:24px;padding:24px;box-shadow:0 8px 24px rgba(255,141,161,0.1);margin-bottom:20px}
+.card h3{color:var(--love);margin-bottom:16px;font-size:1.3rem}
+.add-area{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+.add-area input{flex:1;padding:12px 14px;border:1px solid #ffe0e8;border-radius:40px;outline:none;background:#fffafc}
+.add-area button{background:var(--love);border:none;padding:0 22px;border-radius:40px;color:white;cursor:pointer;font-weight:500}
+.collect-list{display:flex;flex-direction:column;gap:12px}
+.collect-item{background:#fffafc;border-radius:20px;padding:16px 18px;border:1px solid #ffe6f0;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s}
+.collect-item .text{font-size:15px;color:#4a4a4a;line-height:1.45;word-break:break-word;flex:1;margin-right:15px}
+.collect-item .del{background:#ffb7c7;color:white;border:none;width:30px;height:30px;border-radius:30px;font-size:16px;cursor:pointer;flex-shrink:0}
+.empty-tip{text-align:center;color:#bfbfbf;padding:32px 0}
+.cloud-tip{margin-top:20px;background:#fcf3f6;border-radius:20px;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
+.cloud-tip span{font-size:13px;color:#c28698}
+.cloud-tip button{background:#b2d8d8;border:none;padding:6px 14px;border-radius:30px;cursor:pointer;color:#5e5e5e;font-size:12px}
 </style>
 </head>
 <body>
+
+<div class="toast success" id="toast"></div>
+
 <header>
   <div class="nav">
-    <div class="logo">⭐ 私人收藏</div>
+    <div class="logo">⭐ 私人收藏 · 心动集</div>
     <div class="menu">
       <a href="index.html">首页</a>
       <a href="diary.html">日记</a>
@@ -32,12 +48,83 @@ header{background:var(--card);box-shadow:0 8px 24px rgba(255,141,161,0.1);positi
     </div>
   </div>
 </header>
+
 <div class="container">
-  <div class="grid">
-    <div class="item"><h3>浪漫文案</h3><p>收藏温柔的句子</p></div>
-    <div class="item"><h3>约会清单</h3><p>想和你一起做的事</p></div>
-    <div class="item"><h3>重要日子</h3><p>记住每一个瞬间</p></div>
+  <div class="card">
+    <h3>✨ 收藏心动句子 / 纪念片段</h3>
+    <div class="add-area">
+      <input type="text" id="collectInput" placeholder="写下想收藏的话... 例如: 第一次旅行的车站 🚂" autocomplete="off">
+      <button onclick="addCollect()">➕ 收藏</button>
+    </div>
+    <div id="collectList" class="collect-list"></div>
+  </div>
+
+  <div class="cloud-tip">
+    <span>☁️ 收藏内容已跟随「设置页」坚果云备份同步，永不丢失</span>
+    <button onclick="window.location.href='setting.html'">去云端同步</button>
   </div>
 </div>
+
+<script>
+function showToast(t,s=true){const o=document.getElementById('toast');o.innerText=t;o.className='toast '+(s?'success':'error');o.style.display='block';setTimeout(()=>o.style.display='none',2200);}
+
+// 获取收藏列表 [{ id, text }]
+function getCollects(){return JSON.parse(localStorage.getItem('loveCollects')||'[]');}
+function saveCollects(list){localStorage.setItem('loveCollects',JSON.stringify(list));}
+
+function addCollect(){
+  const input = document.getElementById('collectInput');
+  const text = input.value.trim();
+  if(!text){ showToast('写一点想收藏的内容吧~',false); return; }
+  const list = getCollects();
+  list.unshift({ id: Date.now(), text: text });
+  saveCollects(list);
+  input.value = '';
+  renderCollects();
+  showToast('收藏成功 🌟');
+}
+
+function delCollect(id){
+  let list = getCollects();
+  list = list.filter(item => item.id != id);
+  saveCollects(list);
+  renderCollects();
+  showToast('已移除收藏');
+}
+
+function renderCollects(){
+  const list = getCollects();
+  const container = document.getElementById('collectList');
+  if(list.length === 0){
+    container.innerHTML = `<div class="empty-tip">💭 收藏一些温柔的话，留着以后一起看</div>`;
+    return;
+  }
+  let html = '';
+  list.forEach(item => {
+    html += `
+      <div class="collect-item">
+        <div class="text">${escapeHtml(item.text)}</div>
+        <button class="del" onclick="delCollect(${item.id})">✕</button>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function escapeHtml(str){
+  return str.replace(/[&<>]/g, function(m){
+    if(m === '&') return '&amp;';
+    if(m === '<') return '&lt;';
+    if(m === '>') return '&gt;';
+    return m;
+  }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c){
+    return c;
+  });
+}
+
+window.onload = () => {
+  renderCollects();
+};
+</script>
 </body>
 </html>
