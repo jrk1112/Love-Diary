@@ -61,9 +61,18 @@ button{background:var(--love);color:#fff;border:none;padding:10px 16px;border-ra
     </div>
     <div id="memList"></div>
   </div>
+
+  <!-- ============================================== -->
+  <!-- 👇 这里就是【坚果云自动同步】区域 👇 -->
+  <!-- ============================================== -->
   <div class="card">
     <h3>☁️ 坚果云自动同步</h3>
-    <input type="text" id="proxyUrl" placeholder="代理地址">
+
+    <!-- ============================================== -->
+    <!-- 👇 【重点】这一行输入框 = 代理服务地址 👇 -->
+    <!-- ============================================== -->
+    <input type="text" id="proxyUrl" placeholder="https://love-diary-a1h.pages.dev/">
+
     <input type="text" id="jgyUser" placeholder="坚果云账号">
     <input type="password" id="jgyPass" placeholder="第三方应用密码">
     <button onclick="saveSyncConfig()">保存配置</button>
@@ -82,7 +91,7 @@ function addMem(){const n=document.getElementById('mName').value.trim();const d=
 function delMem(i){const l=getMem();l.splice(i,1);localStorage.setItem('memorialList',JSON.stringify(l));showToast('删除成功');renderMem()}
 function renderMem(){const l=getMem();const b=document.getElementById('memList');let h='';l.forEach((item,i)=>{h+=`<div class="mem-item"><div class="text"><div class="name">${item.name}</div><div class="date">${item.date}</div></div><button class="del-btn" onclick="delMem(${i})">×</button></div>`});b.innerHTML=h}
 const syncKey="sync_cfg";
-function loadSyncConfig(){let cfg=JSON.parse(localStorage.getItem(syncKey)||'{}');document.getElementById("proxyUrl").value=cfg.proxyUrl||"https://dav.jianguoyun.com/dav/";document.getElementById("jgyUser").value=cfg.user||"";document.getElementById("jgyPass").value=cfg.pass||""}
+function loadSyncConfig(){let cfg=JSON.parse(localStorage.getItem(syncKey)||'{}');document.getElementById("proxyUrl").value=cfg.proxyUrl||"";document.getElementById("jgyUser").value=cfg.user||"";document.getElementById("jgyPass").value=cfg.pass||""}
 function saveSyncConfig(){let proxyUrl=document.getElementById("proxyUrl").value.trim();let user=document.getElementById("jgyUser").value.trim();let pass=document.getElementById("jgyPass").value.trim();if(!proxyUrl||!user||!pass){showToast("配置不能为空",!1);return}localStorage.setItem(syncKey,JSON.stringify({proxyUrl,user,pass}));showToast("配置保存成功")}
 function getAllData(){return{loveConfig:JSON.parse(localStorage.getItem("loveConfig")||"{}"),diary:JSON.parse(localStorage.getItem("loveDiaries")||"[]"),memorial:JSON.parse(localStorage.getItem("memorialList")||"[]")}}
 async function uploadBackup(){let cfg=JSON.parse(localStorage.getItem(syncKey)||"{}");if(!cfg.proxyUrl){showToast("请配置代理",!1);return}try{const auth="Basic "+btoa(cfg.user+":"+cfg.pass);const res=await fetch(cfg.proxyUrl+"/dav/LoveDiary/backup.json",{method:"PUT",headers:{"Authorization":auth,"Content-Type":"application/json"},body:JSON.stringify(getAllData())});if(res.ok)showToast("备份成功");else showToast("备份失败",!1)}catch(e){showToast("网络请求失败",!1)}}
