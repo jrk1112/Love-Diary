@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>甜蜜相册</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC,Microsoft YaHei,sans-serif}
+:root{--love:#ff8da1;--bg:#fffafc;--card:#fff}
+body{background:var(--bg);padding-bottom:70px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 22px;border-radius:20px;font-size:14px;z-index:9999;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.toast.success{background:#fff;color:#2a9e76;border:1px solid #d1f0e3}
+.toast.error{background:#fff;color:#e65353;border:1px solid #ffe0e0}
+header{background:var(--card);box-shadow:0 8px 24px rgba(255,141,161,0.1);position:sticky;top:0}
+.nav{max-width:1000px;margin:0 auto;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.5rem;color:var(--love);font-weight:bold}
+.menu a{margin-left:1.5rem;color:#666;text-decoration:none}
+.menu a:hover{color:var(--love)}
+.container{max-width:1000px;margin:2rem auto;padding:0 1.5rem}
+.album{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.photo{aspect-ratio:1;background:#fff;border-radius:12px;overflow:hidden;position:relative}
+.photo img{width:100%;height:100%;object-fit:cover}
+.upload{border:2px dashed #ffc0d0;color:var(--love);display:flex;align-items:center;justify-content:center;cursor:pointer}
+#file{display:none}
+.del{position:absolute;top:6px;right:6px;background:#ff5252;color:#fff;width:22px;height:22px;border-radius:50%;border:none;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="toast success" id="toast"></div>
+
+<header>
+  <div class="nav">
+    <div class="logo">📸 甜蜜相册</div>
+    <div class="menu">
+      <a href="index.html">首页</a>
+      <a href="diary.html">日记</a>
+      <a href="album.html">相册</a>
+      <a href="collect.html">收藏</a>
+      <a href="setting.html">设置</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="album" id="album">
+    <label class="photo upload">
+      <input type="file" id="file" accept="image/*" hidden>
+      + 上传
+    </label>
+  </div>
+</div>
+
+<script>
+function showToast(t,s=true){const o=document.getElementById('toast');o.innerText=t;o.className='toast '+(s?'success':'error');o.style.display='block';setTimeout(()=>o.style.display='none',2200)}
+function render(){const l=JSON.parse(localStorage.getItem('lovePhotos')||'[]');const b=document.getElementById('album');let h='<label class="photo upload"><input type="file" id="file" accept="image/*" hidden>+ 上传</label>';l.forEach((s,i)=>{h+=`<div class="photo"><img src="${s}"><button class="del" onclick="del(${i})">×</button></div>`});b.innerHTML=h;document.getElementById('file').onchange=upload}
+function upload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const l=JSON.parse(localStorage.getItem('lovePhotos')||'[]');l.unshift(r.result);localStorage.setItem('lovePhotos',JSON.stringify(l));showToast('上传成功');render()};r.readAsDataURL(f);e.target.value=''}
+function del(i){const l=JSON.parse(localStorage.getItem('lovePhotos')||'[]');l.splice(i,1);localStorage.setItem('lovePhotos',JSON.stringify(l));showToast('删除成功');render()}
+render();
+</script>
+</body>
+</html>
