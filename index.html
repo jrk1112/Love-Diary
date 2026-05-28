@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>我们的纪念</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC,Microsoft YaHei,sans-serif}
+:root{--love:#ff8da1;--bg:#fffafc;--card:#fff;--shadow:0 8px 24px rgba(255,141,161,0.1)}
+body{background:var(--bg);padding-bottom:70px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 22px;border-radius:20px;font-size:14px;z-index:9999;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.toast.success{background:#fff;color:#2a9e76;border:1px solid #d1f0e3}
+.toast.error{background:#fff;color:#e65353;border:1px solid #ffe0e0}
+header{background:var(--card);box-shadow:var(--shadow);position:sticky;top:0}
+.nav{max-width:1000px;margin:0 auto;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.5rem;color:var(--love);font-weight:bold}
+.menu a{margin-left:1.5rem;color:#666;text-decoration:none}
+.menu a:hover{color:var(--love)}
+.container{max-width:1000px;margin:2rem auto;padding:0 1.5rem}
+.timer{background:linear-gradient(135deg,#ffeff3,#ffe6f0);text-align:center;padding:4rem 2rem;border-radius:20px;margin:3rem 0}
+.timer h1{color:var(--love);font-size:2.2rem;margin-bottom:1rem}
+.nav-card-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-top:2rem}
+.nav-card{background:var(--card);border-radius:16px;padding:2rem;text-align:center;box-shadow:var(--shadow)}
+.nav-card a{text-decoration:none;color:#444}
+.nav-card span{display:block;color:var(--love);font-size:2rem;margin-bottom:0.8rem}
+.countdown-bar-wrap{margin-top:3rem;display:flex;flex-direction:column;gap:0.8rem}
+.count-bar{background:#fff;padding:1rem 1.5rem;border-radius:12px;box-shadow:var(--shadow);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<div class="toast success" id="toast"></div>
+
+<header>
+  <div class="nav">
+    <div class="logo">💗 我们的纪念</div>
+    <div class="menu">
+      <a href="index.html">首页</a>
+      <a href="diary.html">日记</a>
+      <a href="album.html">相册</a>
+      <a href="collect.html">收藏</a>
+      <a href="setting.html">设置</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="timer">
+    <h1>我们在一起啦</h1>
+    <p id="loveDay">已在一起 0 天 0 时 0 分 0 秒</p>
+  </div>
+
+  <div class="nav-card-list">
+    <div class="nav-card"><a href="diary.html"><span>💌</span>恋爱日记</a></div>
+    <div class="nav-card"><a href="album.html"><span>📸</span>甜蜜相册</a></div>
+    <div class="nav-card"><a href="collect.html"><span>⭐</span>私人收藏</a></div>
+  </div>
+
+  <div class="countdown-bar-wrap">
+    <div class="count-bar">
+      <span id="festName">最近节日</span>
+      <span id="festDay">0 天</span>
+    </div>
+    <div class="count-bar">
+      <span id="memName">最近纪念日</span>
+      <span id="memDay">0 天</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// 底部提示
+function showToast(text, success=true){
+  const t=document.getElementById('toast');
+  t.innerText=text;
+  t.className='toast '+(success?'success':'error');
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',2200);
+}
+
+// 配置读取
+function getConfig(){return JSON.parse(localStorage.getItem('loveConfig')||'{"loveDate":"2025-01-01"}')}
+function getMemorialList(){return JSON.parse(localStorage.getItem('memorialList')||'[]')}
+
+// 相恋倒计时
+const loveStart = new Date(getConfig().loveDate);
+function runLoveTime(){
+  const diff = new Date() - loveStart;
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('loveDay').innerText = `已在一起 ${d}天 ${h}时 ${m}分 ${s}秒`;
+}
+
+// ==============================================
+// 🌍 永久自动日历：农历+公历 每年自动同步
+// ==============================================
+function getSolarTerm(year, month, day) {
+  return new Date(year, month - 1, day);
+}
+
+function getLunarFestival(year) {
+  const lunar = [
+    { name: "春节", month: 1, day: 1 },
+    { name: "元宵节", month: 1, day: 15 },
+    { name: "端午节", month: 5, day: 5 },
+    { name: "七夕节", month: 7, day: 7 },
+    { name: "中秋节", month: 8, day: 15 },
+    { name: "重阳节", month: 9, day: 9 },
+    { name: "除夕", month: 12, day: 29 }
+  ];
+  return lunar.map(item => ({
+    name: item.name,
+    date: new Date(year, item.month - 1, item.day)
+  }));
+}
+
+function getFixedFestival(year) {
+  return [
+    { name: "元旦", date: getSolarTerm(year, 1, 1) },
+    { name: "情人节", date: getSolarTerm(year, 2, 14) },
+    { name: "妇女节", date: getSolarTerm(year, 3, 8) },
+    { name: "愚人节", date: getSolarTerm(year, 4, 1) },
+    { name: "劳动节", date: getSolarTerm(year, 5, 1) },
+    { name: "青年节", date: getSolarTerm(year, 5, 4) },
+    { name: "儿童节", date: getSolarTerm(year, 6, 1) },
+    { name: "建党节", date: getSolarTerm(year, 7, 1) },
+    { name: "建军节", date: getSolarTerm(year, 8, 1) },
+    { name: "教师节", date: getSolarTerm(year, 9, 10) },
+    { name: "国庆节", date: getSolarTerm(year, 10, 1) },
+    { name: "平安夜", date: getSolarTerm(year, 12, 24) },
+    { name: "圣诞节", date: getSolarTerm(year, 12, 25) },
+    { name: "清明节", date: getSolarTerm(year, 4, 5) }
+  ];
+}
+
+function getAllFestivals() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const lunar = getLunarFestival(year);
+  const fixed = getFixedFestival(year);
+  const next = getFixedFestival(year + 1);
+  return [...lunar, ...fixed, ...next];
+}
+
+// 获取最近节日
+function getNearestFestival() {
+  const now = new Date();
+  const list = getAllFestivals();
+  let min = 9999, res = null;
+  list.forEach(f => {
+    const d = Math.ceil((f.date - now) / 86400000);
+    if (d >= 0 && d < min) {
+      min = d;
+      res = { name: f.name, days: min };
+    }
+  });
+  return res || { name: "暂无", days: "--" };
+}
+
+// 获取最近纪念日
+function getNearestMemorial() {
+  const now = new Date();
+  const list = getMemorialList();
+  if (list.length === 0) return { name: "暂无纪念日", days: "--" };
+  let min = 9999, res = null;
+  list.forEach(item => {
+    const t = new Date(item.date);
+    const d = Math.ceil((t - now) / 86400000);
+    if (d >= 0 && d < min) {
+      min = d;
+      res = { name: item.name, days: min };
+    }
+  });
+  return res || { name: "暂无纪念日", days: "--" };
+}
+
+// 更新显示
+function updateCountdown() {
+  const f = getNearestFestival();
+  document.getElementById("festName").innerText = "🎊 " + f.name;
+  document.getElementById("festDay").innerText = f.days + (f.days === "--" ? "" : " 天");
+
+  const m = getNearestMemorial();
+  document.getElementById("memName").innerText = "💝 " + m.name;
+  document.getElementById("memDay").innerText = m.days + (m.days === "--" ? "" : " 天");
+}
+
+// 启动
+setInterval(runLoveTime, 1000);
+runLoveTime();
+updateCountdown();
+</script>
+</body>
+</html>

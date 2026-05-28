@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>私人收藏</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC,Microsoft YaHei,sans-serif}
+:root{--love:#ff8da1;--bg:#fffafc;--card:#fff}
+body{background:var(--bg)}
+header{background:var(--card);box-shadow:0 8px 24px rgba(255,141,161,0.1);position:sticky;top:0}
+.nav{max-width:1000px;margin:0 auto;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.5rem;color:var(--love);font-weight:bold}
+.menu a{margin-left:1.5rem;color:#666;text-decoration:none}
+.menu a:hover{color:var(--love)}
+.container{max-width:1000px;margin:2rem auto;padding:0 1.5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.item{background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(255,141,161,0.1)}
+.item h3{color:var(--love);margin-bottom:10px}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="logo">⭐ 私人收藏</div>
+    <div class="menu">
+      <a href="index.html">首页</a>
+      <a href="diary.html">日记</a>
+      <a href="album.html">相册</a>
+      <a href="collect.html">收藏</a>
+      <a href="setting.html">设置</a>
+    </div>
+  </div>
+</header>
+<div class="container">
+  <div class="grid">
+    <div class="item"><h3>浪漫文案</h3><p>收藏温柔的句子</p></div>
+    <div class="item"><h3>约会清单</h3><p>想和你一起做的事</p></div>
+    <div class="item"><h3>重要日子</h3><p>记住每一个瞬间</p></div>
+  </div>
+</div>
+</body>
+</html>
