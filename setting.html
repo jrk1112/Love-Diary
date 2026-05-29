@@ -78,11 +78,9 @@ button{background:var(--love);color:#fff;border:none;padding:10px 16px;border-ra
       <button onclick="syncFromCloud()" style="background:#7cb3ff">⬇️ 从云端恢复</button>
     </div>
     <div class="warning-box">
-      ⚠️ 若遇到“网络/跨域错误”，请按以下方法解决：<br>
-      1️⃣ <strong>部署到 GitHub Pages</strong>（推荐）：将本文件夹上传至 GitHub，启用 Pages 后访问 https 网址。<br>
-      2️⃣ <strong>本地测试</strong>：安装 Node.js 后，在文件夹运行 <code>npx http-server -c-1</code>，用显示的 http://localhost 地址打开。<br>
-      3️⃣ <strong>坚果云密码</strong>：请使用“第三方应用密码”（在网页版账户安全中生成），不是登录密码。<br>
-      更多帮助 → <a href="https://help.jianguoyun.com/" target="_blank">坚果云官方帮助</a>
+      ⚠️ 若遇到“网络/跨域错误”，请将网站部署到 HTTPS 服务器（如 GitHub Pages）后再试。<br>
+      📌 坚果云密码请使用“第三方应用密码”（在网页版账户安全中生成）。<br>
+      ✨ 支持同步：日记、相册照片、纪念日、收藏（新对话框格式）、相恋时间。
     </div>
   </div>
 </div>
@@ -98,9 +96,44 @@ function renderMem(){const l=getMem();const b=document.getElementById('memList')
 function escapeHtml(str){return str.replace(/[&<>]/g,function(m){if(m==='&') return '&amp;';if(m==='<') return '&lt;';if(m==='>') return '&gt;';return m;});}
 function loadDavConfig(){const def={server:"https://dav.jianguoyun.com/dav/",account:"",token:"",path:"LoveDiary"};const c=JSON.parse(localStorage.getItem("davConfig")||JSON.stringify(def));document.getElementById("davServer").value=c.server;document.getElementById("davAccount").value=c.account;document.getElementById("davToken").value=c.token;document.getElementById("davPath").value=c.path;}
 function saveDavConfig(){const server=document.getElementById("davServer").value.trim();const account=document.getElementById("davAccount").value.trim();const token=document.getElementById("davToken").value.trim();const path=document.getElementById("davPath").value.trim();if(!server||!account||!token||!path){showToast("配置不能为空",false);return;}localStorage.setItem("davConfig",JSON.stringify({server,account,token,path}));showToast("配置保存成功");}
-function getAllData(){return{loveConfig:JSON.parse(localStorage.getItem("loveConfig")||'{"loveDate":"2025-01-01"}'),diary:JSON.parse(localStorage.getItem("loveDiaries")||'[]'),album:JSON.parse(localStorage.getItem("lovePhotos")||'[]'),memorial:JSON.parse(localStorage.getItem("memorialList")||'[]'),collects:JSON.parse(localStorage.getItem("loveCollects")||'[]')};}
-async function syncToCloud(){const cfg=JSON.parse(localStorage.getItem("davConfig"));if(!cfg){showToast("请先保存坚果云配置",false);return;}const data=getAllData();const content=JSON.stringify(data,null,2);const url=`${cfg.server}${cfg.path}/backup.json`;try{const r=await fetch(url,{method:"PUT",headers:{Authorization:"Basic "+btoa(cfg.account+":"+cfg.token),"Content-Type":"application/json"},body:content});if(r.ok||r.status===201){showToast("✅ 备份上传成功 (日记/相册/纪念日/收藏)");}else{let errMsg="上传失败 "+r.status;try{const txt=await r.text();if(txt)errMsg+=" "+txt;}catch(e){}showToast(errMsg,false);}}catch(e){showToast("❌ 网络/跨域错误：请将网页部署到 HTTPS 服务器（如 GitHub Pages）后再试",false);}}
-async function syncFromCloud(){const cfg=JSON.parse(localStorage.getItem("davConfig"));if(!cfg){showToast("请先保存坚果云配置",false);return;}const url=`${cfg.server}${cfg.path}/backup.json`;try{const r=await fetch(url,{method:"GET",headers:{Authorization:"Basic "+btoa(cfg.account+":"+cfg.token)}});if(!r.ok){showToast("云端无备份文件或同步失败",false);return;}const data=await r.json();if(data.loveConfig)localStorage.setItem("loveConfig",JSON.stringify(data.loveConfig));if(data.diary)localStorage.setItem("loveDiaries",JSON.stringify(data.diary));if(data.album)localStorage.setItem("lovePhotos",JSON.stringify(data.album));if(data.memorial)localStorage.setItem("memorialList",JSON.stringify(data.memorial));if(data.collects)localStorage.setItem("loveCollects",JSON.stringify(data.collects));showToast("同步恢复成功！刷新页面生效 ✅");setTimeout(()=>location.reload(),1500);}catch(e){showToast("❌ 网络/跨域错误：请部署到 HTTPS 服务器后使用",false);}}
+function getAllData(){
+  return {
+    loveConfig: JSON.parse(localStorage.getItem("loveConfig")||'{"loveDate":"2025-01-01"}'),
+    diary: JSON.parse(localStorage.getItem("loveDiaries")||'[]'),
+    album: JSON.parse(localStorage.getItem("lovePhotos")||'[]'),
+    memorial: JSON.parse(localStorage.getItem("memorialList")||'[]'),
+    collectsV2: JSON.parse(localStorage.getItem("loveCollectsV2")||'[]')
+  };
+}
+async function syncToCloud(){
+  const cfg=JSON.parse(localStorage.getItem("davConfig"));
+  if(!cfg){showToast("请先保存坚果云配置",false);return;}
+  const data=getAllData();
+  const content=JSON.stringify(data,null,2);
+  const url=`${cfg.server}${cfg.path}/backup.json`;
+  try{
+    const r=await fetch(url,{method:"PUT",headers:{Authorization:"Basic "+btoa(cfg.account+":"+cfg.token),"Content-Type":"application/json"},body:content});
+    if(r.ok||r.status===201){showToast("✅ 备份上传成功 (日记/相册/纪念日/收藏)");}
+    else{let errMsg="上传失败 "+r.status;try{const txt=await r.text();if(txt)errMsg+=" "+txt;}catch(e){}showToast(errMsg,false);}
+  }catch(e){showToast("❌ 网络/跨域错误：请将网页部署到 HTTPS 服务器（如 GitHub Pages）后再试",false);}
+}
+async function syncFromCloud(){
+  const cfg=JSON.parse(localStorage.getItem("davConfig"));
+  if(!cfg){showToast("请先保存坚果云配置",false);return;}
+  const url=`${cfg.server}${cfg.path}/backup.json`;
+  try{
+    const r=await fetch(url,{method:"GET",headers:{Authorization:"Basic "+btoa(cfg.account+":"+cfg.token)}});
+    if(!r.ok){showToast("云端无备份文件或同步失败",false);return;}
+    const data=await r.json();
+    if(data.loveConfig) localStorage.setItem("loveConfig",JSON.stringify(data.loveConfig));
+    if(data.diary) localStorage.setItem("loveDiaries",JSON.stringify(data.diary));
+    if(data.album) localStorage.setItem("lovePhotos",JSON.stringify(data.album));
+    if(data.memorial) localStorage.setItem("memorialList",JSON.stringify(data.memorial));
+    if(data.collectsV2) localStorage.setItem("loveCollectsV2",JSON.stringify(data.collectsV2));
+    showToast("同步恢复成功！刷新页面生效 ✅");
+    setTimeout(()=>location.reload(),1500);
+  }catch(e){showToast("❌ 网络/跨域错误：请部署到 HTTPS 服务器后使用",false);}
+}
 window.onload=()=>{loadLove();renderMem();loadDavConfig();};
 </script>
 </body>

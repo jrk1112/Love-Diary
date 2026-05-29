@@ -2,43 +2,76 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>私人收藏 · 心动集</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>私人收藏 · 心动收藏</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC,Microsoft YaHei,sans-serif}
-:root{--love:#ff8da1;--bg:#fffafc;--card:#fff}
-body{background:var(--bg);padding-bottom:70px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 22px;border-radius:20px;font-size:14px;z-index:9999;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-.toast.success{background:#fff;color:#2a9e76;border:1px solid #d1f0e3}
-.toast.error{background:#fff;color:#e65353;border:1px solid #ffe0e0}
-header{background:var(--card);box-shadow:0 8px 24px rgba(255,141,161,0.1);position:sticky;top:0}
-.nav{max-width:1000px;margin:0 auto;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:1.5rem;color:var(--love);font-weight:bold}
-.menu a{margin-left:1.5rem;color:#666;text-decoration:none}
+:root{--love:#ff8da1;--bg:#fffafc;--card:#fff;--bubble-me:#ffe4ed}
+body{background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);padding:10px 22px;border-radius:20px;font-size:14px;z-index:9999;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.1);background:#fff;white-space:nowrap}
+.toast.success{color:#2a9e76;border:1px solid #d1f0e3}
+.toast.error{color:#e65353;border:1px solid #ffe0e0}
+/* 头部样式完全复制自 album.html，并增加 flex-shrink:0 和 nowrap */
+header{background:var(--card);box-shadow:0 8px 24px rgba(255,141,161,0.1);position:sticky;top:0;flex-shrink:0}
+.nav{max-width:1000px;margin:0 auto;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:nowrap;gap:12px}
+.logo{font-size:1.5rem;color:var(--love);font-weight:bold;white-space:nowrap}
+.menu{display:flex;gap:0;flex-wrap:nowrap}
+.menu a{margin-left:1.5rem;color:#666;text-decoration:none;white-space:nowrap}
 .menu a:hover{color:var(--love)}
-.container{max-width:700px;margin:2rem auto;padding:0 1.5rem}
-.card{background:#fff;border-radius:24px;padding:24px;box-shadow:0 8px 24px rgba(255,141,161,0.1);margin-bottom:20px}
-.card h3{color:var(--love);margin-bottom:16px;font-size:1.3rem}
-.add-area{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
-.add-area input{flex:1;padding:12px 14px;border:1px solid #ffe0e8;border-radius:40px;outline:none;background:#fffafc}
-.add-area button{background:var(--love);border:none;padding:0 22px;border-radius:40px;color:white;cursor:pointer;font-weight:500}
-.collect-list{display:flex;flex-direction:column;gap:12px}
-.collect-item{background:#fffafc;border-radius:20px;padding:16px 18px;border:1px solid #ffe6f0;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s}
-.collect-item .text{font-size:15px;color:#4a4a4a;line-height:1.45;word-break:break-word;flex:1;margin-right:15px}
-.collect-item .del{background:#ffb7c7;color:white;border:none;width:30px;height:30px;border-radius:30px;font-size:16px;cursor:pointer;flex-shrink:0}
-.empty-tip{text-align:center;color:#bfbfbf;padding:32px 0}
-.cloud-tip{margin-top:20px;background:#fcf3f6;border-radius:20px;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
-.cloud-tip span{font-size:13px;color:#c28698}
-.cloud-tip button{background:#b2d8d8;border:none;padding:6px 14px;border-radius:30px;cursor:pointer;color:#5e5e5e;font-size:12px}
+/* 小屏幕下稍微缩小菜单间距 */
+@media (max-width: 600px){
+  .nav{padding:0.8rem 1rem}
+  .menu a{margin-left:1rem}
+  .logo{font-size:1.3rem}
+}
+/* 组合暂存区 */
+.compose-bar{background:#fff5f7;border-bottom:1px solid #ffd9e4;padding:8px 12px;display:flex;align-items:center;gap:8px;overflow-x:auto;flex-shrink:0}
+.compose-item{background:#ffe0e8;border-radius:20px;padding:4px 12px;font-size:12px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.compose-item button{background:none;border:none;color:#ff5e7e;cursor:pointer;margin-left:6px;font-size:14px}
+.compose-clear{background:none;border:none;color:#ff8da1;font-size:12px;cursor:pointer;padding:0 8px}
+.chat-container{flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;gap:12px}
+.message{display:flex;justify-content:flex-end;animation:fadeIn 0.2s ease}
+.message-bubble{max-width:80%;background:var(--bubble-me);border-radius:20px 20px 8px 20px;padding:10px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.05);position:relative}
+.message-time{font-size:10px;color:#aaa;margin-top:6px;text-align:right}
+.fragment-text{word-break:break-word;font-size:15px;line-height:1.45;color:#333}
+.fragment-image img{max-width:100%;border-radius:12px;cursor:pointer;max-height:200px;object-fit:cover}
+.fragment-video video{max-width:100%;border-radius:12px;max-height:240px}
+.fragment-audio audio{width:200px;height:36px;border-radius:30px}
+.fragment-sticker img{max-width:120px;max-height:120px;border-radius:12px;cursor:pointer}
+.fragment-sticker span{font-size:48px;display:inline-block}
+.fragment-file .file-link{background:#f5f5f5;padding:8px 12px;border-radius:16px;display:inline-flex;align-items:center;gap:8px;color:#555;text-decoration:none;font-size:13px}
+.fragment-file .file-link span{font-size:20px}
+.fragment-location{background:#f5f5f5;border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px}
+.fragment-location span{font-size:24px}
+.fragment-location .loc-info{font-size:14px;color:#333}
+.fragment-location .loc-link{font-size:12px;color:#ff8da1;text-decoration:none}
+.delete-btn{position:absolute;top:-8px;right:-8px;background:#ff5e7e;color:white;border:none;border-radius:20px;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s}
+.message-bubble:hover .delete-btn{opacity:1}
+.input-bar{background:white;border-top:1px solid #e9e9e9;padding:8px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.voice-btn{background:none;border:none;font-size:28px;cursor:pointer;color:#666;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.voice-btn.recording{background:#ff5e7e;color:white}
+.input-wrapper{flex:1;background:#f5f5f5;border-radius:30px;padding:6px 16px;display:flex;align-items:center}
+.input-wrapper input{flex:1;border:none;background:transparent;outline:none;font-size:15px;padding:8px 0}
+.emoji-btn{background:none;border:none;font-size:28px;cursor:pointer;color:#666;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.plus-btn{background:none;border:none;font-size:28px;cursor:pointer;color:#666;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.send-btn{background:var(--love);border:none;color:white;border-radius:30px;padding:6px 18px;font-size:14px;cursor:pointer;margin-left:4px}
+.attach-panel{position:fixed;bottom:70px;right:12px;background:white;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.15);padding:12px;display:none;flex-direction:column;gap:8px;z-index:1000;min-width:130px}
+.attach-panel button{background:#f9f0f4;border:none;padding:10px 16px;border-radius:40px;font-size:14px;color:#555;display:flex;align-items:center;gap:12px;cursor:pointer;width:100%}
+.attach-panel button span{font-size:22px}
+.recording-indicator{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#ff5e7e;color:white;padding:8px 16px;border-radius:40px;z-index:1002;display:none;gap:10px;align-items:center}
+.recording-indicator button{background:white;border:none;padding:4px 12px;border-radius:20px;cursor:pointer}
+.hidden-file{display:none}
+.emoji-picker-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:1000;display:flex;align-items:flex-end;justify-content:center}
+.emoji-picker-container{background:white;border-radius:24px 24px 0 0;padding:20px;width:100%;max-width:500px;max-height:60vh;overflow-y:auto}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.empty-tip{text-align:center;color:#ccc;margin-top:40px}
 </style>
 </head>
 <body>
-
-<div class="toast success" id="toast"></div>
-
+<div class="toast" id="toast"></div>
 <header>
   <div class="nav">
-    <div class="logo">⭐ 私人收藏 · 心动集</div>
+    <div class="logo">💬 心动收藏</div>
     <div class="menu">
       <a href="index.html">首页</a>
       <a href="diary.html">日记</a>
@@ -49,62 +82,142 @@ header{background:var(--card);box-shadow:0 8px 24px rgba(255,141,161,0.1);positi
   </div>
 </header>
 
-<div class="container">
-  <div class="card">
-    <h3>✨ 收藏心动句子 / 纪念片段</h3>
-    <div class="add-area">
-      <input type="text" id="collectInput" placeholder="写下想收藏的话... 例如: 第一次旅行的车站 🚂" autocomplete="off">
-      <button onclick="addCollect()">➕ 收藏</button>
-    </div>
-    <div id="collectList" class="collect-list"></div>
-  </div>
+<!-- 组合暂存区 -->
+<div class="compose-bar" id="composeBar" style="display:none;">
+  <div id="composeItems"></div>
+  <button class="compose-clear" id="clearComposeBtn">清空</button>
+</div>
 
-  <div class="cloud-tip">
-    <span>☁️ 收藏内容已跟随「设置页」坚果云备份同步，永不丢失</span>
-    <button onclick="window.location.href='setting.html'">去云端同步</button>
+<div class="chat-container" id="chatContainer">
+  <div class="empty-tip">✨ 收藏你的一切心动瞬间 ✨<br>添加内容到组合区，最后点击发送</div>
+</div>
+
+<div class="input-bar">
+  <button class="voice-btn" id="voiceBtn">🎤</button>
+  <div class="input-wrapper">
+    <input type="text" id="messageInput" placeholder="文字..." autocomplete="off">
   </div>
+  <button class="emoji-btn" id="emojiBtn">😊</button>
+  <button class="plus-btn" id="plusBtn">➕</button>
+  <button class="send-btn" id="sendBtn">发送</button>
+</div>
+
+<div class="attach-panel" id="attachPanel">
+  <button id="btnImage"><span>🖼️</span> 图片</button>
+  <button id="btnVideo"><span>🎬</span> 视频</button>
+  <button id="btnLocation"><span>📍</span> 位置</button>
+  <button id="btnFile"><span>📎</span> 文件</button>
+</div>
+
+<input type="file" id="imageInput" accept="image/*" multiple class="hidden-file">
+<input type="file" id="videoInput" accept="video/*" multiple class="hidden-file">
+<input type="file" id="fileInput" class="hidden-file">
+
+<div class="recording-indicator" id="recordingIndicator">
+  <span>🔴 录音中...</span>
+  <button id="stopRecordBtn">停止</button>
 </div>
 
 <script>
-function showToast(t,s=true){const o=document.getElementById('toast');o.innerText=t;o.className='toast '+(s?'success':'error');o.style.display='block';setTimeout(()=>o.style.display='none',2200);}
-
-// 获取收藏列表 [{ id, text }]
-function getCollects(){return JSON.parse(localStorage.getItem('loveCollects')||'[]');}
-function saveCollects(list){localStorage.setItem('loveCollects',JSON.stringify(list));}
-
-function addCollect(){
-  const input = document.getElementById('collectInput');
-  const text = input.value.trim();
-  if(!text){ showToast('写一点想收藏的内容吧~',false); return; }
-  const list = getCollects();
-  list.unshift({ id: Date.now(), text: text });
-  saveCollects(list);
-  input.value = '';
-  renderCollects();
-  showToast('收藏成功 🌟');
+// ================== 工具函数 ==================
+function showToast(msg, success=true){
+  const toast = document.getElementById('toast');
+  toast.innerText = msg;
+  toast.className = 'toast ' + (success ? 'success' : 'error');
+  toast.style.display = 'block';
+  setTimeout(()=>toast.style.display='none', 2200);
 }
 
-function delCollect(id){
-  let list = getCollects();
-  list = list.filter(item => item.id != id);
-  saveCollects(list);
-  renderCollects();
-  showToast('已移除收藏');
+// 消息数据存储 (每条消息包含 fragments 数组)
+function getMessages(){
+  let msgs = localStorage.getItem('loveCollectsV4');
+  if(msgs) return JSON.parse(msgs);
+  let old = localStorage.getItem('loveCollectsV3');
+  if(old){
+    let oldArr = JSON.parse(old);
+    let newArr = oldArr.map(item => ({
+      id: item.id,
+      timestamp: item.timestamp,
+      fragments: [item.fragment]
+    }));
+    localStorage.setItem('loveCollectsV4', JSON.stringify(newArr));
+    localStorage.removeItem('loveCollectsV3');
+    return newArr;
+  }
+  return [];
 }
 
-function renderCollects(){
-  const list = getCollects();
-  const container = document.getElementById('collectList');
-  if(list.length === 0){
-    container.innerHTML = `<div class="empty-tip">💭 收藏一些温柔的话，留着以后一起看</div>`;
+function saveMessages(messages){
+  localStorage.setItem('loveCollectsV4', JSON.stringify(messages));
+}
+
+function addMessage(fragments){
+  let msgs = getMessages();
+  let newMsg = {
+    id: Date.now(),
+    timestamp: new Date().toISOString(),
+    fragments: fragments
+  };
+  msgs.push(newMsg);
+  saveMessages(msgs);
+  renderMessages();
+  scrollToBottom();
+  showToast(`已收藏 (${fragments.length}项内容)`);
+}
+
+function deleteMessage(id){
+  let msgs = getMessages();
+  let newMsgs = msgs.filter(m => m.id != id);
+  saveMessages(newMsgs);
+  renderMessages();
+  showToast('已删除');
+}
+
+function formatFileSize(bytes){
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1048576).toFixed(1) + ' MB';
+}
+
+function renderFragment(frag){
+  const type = frag.type;
+  const d = frag.data;
+  switch(type){
+    case 'text': return `<div class="fragment-text">${escapeHtml(d.content)}</div>`;
+    case 'image': return `<div class="fragment-image"><img src="${d.url}" alt="图片" onclick="viewImage('${d.url}')"></div>`;
+    case 'video': return `<div class="fragment-video"><video src="${d.url}" controls preload="metadata"></video></div>`;
+    case 'audio_record': return `<div class="fragment-audio"><audio src="${d.url}" controls></audio><div style="font-size:11px;color:#888;margin-top:4px">${escapeHtml(d.fileName || '语音')}</div></div>`;
+    case 'sticker':
+      if(d.emoji) return `<div class="fragment-sticker"><span>${d.emoji}</span></div>`;
+      else return `<div class="fragment-sticker"><img src="${d.url}" alt="表情包" onclick="viewImage('${d.url}')"></div>`;
+    case 'file': return `<div class="fragment-file"><a href="${d.url}" download="${d.fileName}" class="file-link" target="_blank"><span>📄</span> ${escapeHtml(d.fileName)} (${formatFileSize(d.fileSize)})</a></div>`;
+    case 'location':
+      return `<div class="fragment-location"><span>📍</span><div class="loc-info">${escapeHtml(d.address)}<br><a href="${d.mapUrl}" target="_blank" class="loc-link">查看地图</a></div></div>`;
+    default: return `<div class="fragment-text">暂不支持</div>`;
+  }
+}
+
+function renderMessages(){
+  let msgs = getMessages();
+  const container = document.getElementById('chatContainer');
+  if(msgs.length === 0){
+    container.innerHTML = `<div class="empty-tip">✨ 收藏你的一切心动瞬间 ✨<br>添加内容到组合区，最后点击发送</div>`;
     return;
   }
   let html = '';
-  list.forEach(item => {
+  msgs.forEach(msg => {
+    let fragsHtml = '';
+    for(let frag of msg.fragments){
+      fragsHtml += renderFragment(frag);
+    }
+    let timeStr = new Date(msg.timestamp).toLocaleString();
     html += `
-      <div class="collect-item">
-        <div class="text">${escapeHtml(item.text)}</div>
-        <button class="del" onclick="delCollect(${item.id})">✕</button>
+      <div class="message" data-id="${msg.id}">
+        <div class="message-bubble">
+          <div class="message-content">${fragsHtml}</div>
+          <div class="message-time">${timeStr}</div>
+          <button class="delete-btn" onclick="deleteMessage(${msg.id})">✕</button>
+        </div>
       </div>
     `;
   });
@@ -112,18 +225,352 @@ function renderCollects(){
 }
 
 function escapeHtml(str){
-  return str.replace(/[&<>]/g, function(m){
-    if(m === '&') return '&amp;';
-    if(m === '<') return '&lt;';
-    if(m === '>') return '&gt;';
-    return m;
-  }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c){
-    return c;
-  });
+  if(!str) return '';
+  return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;');
 }
 
+function viewImage(url){
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed'; modal.style.top = 0; modal.style.left = 0; modal.style.right = 0; modal.style.bottom = 0;
+  modal.style.background = 'rgba(0,0,0,0.8)'; modal.style.display = 'flex'; modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center'; modal.style.zIndex = 10000;
+  const img = document.createElement('img'); img.src = url; img.style.maxWidth = '90%'; img.style.maxHeight = '90%'; img.style.borderRadius = '16px';
+  modal.appendChild(img); modal.onclick = ()=>modal.remove();
+  document.body.appendChild(modal);
+}
+
+function scrollToBottom(){
+  const container = document.getElementById('chatContainer');
+  setTimeout(()=> container.scrollTop = container.scrollHeight, 50);
+}
+
+// ================== 组合暂存区逻辑 ==================
+let composeFragments = [];
+
+function updateComposeUI(){
+  const bar = document.getElementById('composeBar');
+  const container = document.getElementById('composeItems');
+  if(composeFragments.length === 0){
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'flex';
+  let html = '';
+  composeFragments.forEach((frag, idx) => {
+    let label = '';
+    if(frag.type === 'text') label = '文字';
+    else if(frag.type === 'image') label = '图片';
+    else if(frag.type === 'video') label = '视频';
+    else if(frag.type === 'audio_record') label = '语音';
+    else if(frag.type === 'sticker') label = frag.data.emoji ? frag.data.emoji : '表情';
+    else if(frag.type === 'file') label = '文件';
+    else if(frag.type === 'location') label = '位置';
+    else label = frag.type;
+    html += `<span class="compose-item">${label}<button onclick="removeComposeItem(${idx})">✕</button></span>`;
+  });
+  container.innerHTML = html;
+}
+
+function removeComposeItem(idx){
+  composeFragments.splice(idx, 1);
+  updateComposeUI();
+}
+
+function clearCompose(){
+  composeFragments = [];
+  updateComposeUI();
+}
+
+function addToCompose(fragment){
+  composeFragments.push(fragment);
+  updateComposeUI();
+  showToast(`已添加到组合 (${getFragmentName(fragment.type)})`);
+}
+
+function getFragmentName(type){
+  const map = { text:'文字', image:'图片', video:'视频', audio_record:'语音', sticker:'表情包', file:'文件', location:'位置' };
+  return map[type] || '内容';
+}
+
+function sendComposeMessage(){
+  let text = document.getElementById('messageInput').value.trim();
+  let fragments = [...composeFragments];
+  if(text){
+    fragments.unshift({ type: 'text', data: { content: text } });
+  }
+  if(fragments.length === 0){
+    showToast('还没有任何内容', false);
+    return;
+  }
+  addMessage(fragments);
+  document.getElementById('messageInput').value = '';
+  clearCompose();
+}
+
+function sendDirectText(){
+  let text = document.getElementById('messageInput').value.trim();
+  if(!text){
+    showToast('请输入文字', false);
+    return;
+  }
+  addMessage([{ type: 'text', data: { content: text } }]);
+  document.getElementById('messageInput').value = '';
+}
+
+function onSendClick(){
+  if(composeFragments.length > 0){
+    sendComposeMessage();
+  } else {
+    sendDirectText();
+  }
+}
+
+// ================== 录音 ==================
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+async function startRecording(){
+  if(isRecording) return;
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      const reader = new FileReader();
+      reader.onload = () => {
+        addToCompose({ type: 'audio_record', data: { url: reader.result, fileName: '录音_' + new Date().toLocaleTimeString() + '.webm' } });
+      };
+      reader.readAsDataURL(audioBlob);
+      stream.getTracks().forEach(track => track.stop());
+      document.getElementById('recordingIndicator').style.display = 'none';
+      isRecording = false;
+      document.getElementById('voiceBtn').classList.remove('recording');
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    document.getElementById('recordingIndicator').style.display = 'flex';
+    document.getElementById('voiceBtn').classList.add('recording');
+  }catch(err){
+    showToast('无法获取麦克风权限', false);
+  }
+}
+function stopRecording(){
+  if(mediaRecorder && mediaRecorder.state === 'recording'){
+    mediaRecorder.stop();
+  }
+}
+document.getElementById('stopRecordBtn').addEventListener('click', stopRecording);
+document.getElementById('voiceBtn').addEventListener('click', ()=>{
+  if(isRecording){
+    stopRecording();
+  } else {
+    startRecording();
+  }
+});
+
+// ================== 图片（多选）添加到组合 ==================
+function selectImages(){
+  document.getElementById('imageInput').click();
+}
+document.getElementById('imageInput').addEventListener('change', function(e){
+  const files = Array.from(e.target.files);
+  for(let file of files){
+    if(file.size > 2*1024*1024){
+      showToast(`${file.name} 超过2MB`, false);
+      continue;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      addToCompose({ type: 'image', data: { url: ev.target.result } });
+    };
+    reader.readAsDataURL(file);
+  }
+  e.target.value = '';
+});
+
+// ================== 视频（多选）添加到组合 ==================
+function selectVideos(){
+  document.getElementById('videoInput').click();
+}
+document.getElementById('videoInput').addEventListener('change', function(e){
+  const files = Array.from(e.target.files);
+  for(let file of files){
+    if(file.size > 10*1024*1024){
+      showToast(`${file.name} 超过10MB`, false);
+      continue;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      addToCompose({ type: 'video', data: { url: ev.target.result } });
+    };
+    reader.readAsDataURL(file);
+  }
+  e.target.value = '';
+});
+
+// ================== 文件（各种类型，多选）添加到组合 ==================
+function selectFiles(){
+  document.getElementById('fileInput').click();
+}
+document.getElementById('fileInput').addEventListener('change', function(e){
+  const files = Array.from(e.target.files);
+  for(let file of files){
+    if(file.size > 20*1024*1024){
+      showToast(`${file.name} 超过20MB`, false);
+      continue;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      addToCompose({ type: 'file', data: { url: ev.target.result, fileName: file.name, fileSize: file.size } });
+    };
+    reader.readAsDataURL(file);
+  }
+  e.target.value = '';
+});
+
+// ================== 位置（详细地址，精确到小区） ==================
+async function getLocation(){
+  if(!navigator.geolocation){
+    showToast('浏览器不支持定位', false);
+    return;
+  }
+  showToast('正在获取位置...', true);
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=zh-CN`;
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        let address = data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        if(data.address){
+          const parts = [];
+          if(data.address.province) parts.push(data.address.province);
+          if(data.address.city) parts.push(data.address.city);
+          else if(data.address.state) parts.push(data.address.state);
+          if(data.address.county) parts.push(data.address.county);
+          if(data.address.suburb) parts.push(data.address.suburb);
+          else if(data.address.neighbourhood) parts.push(data.address.neighbourhood);
+          else if(data.address.road) parts.push(data.address.road);
+          if(data.address.house_number) parts.push(data.address.house_number);
+          if(parts.length >= 2) address = parts.join(' ');
+          else address = data.display_name.split(',')[0] || address;
+        }
+        const mapUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=18/${lat}/${lng}`;
+        addToCompose({ type: 'location', data: { address: address, mapUrl: mapUrl, lat: lat, lng: lng } });
+      } catch (error) {
+        console.error(error);
+        const mapUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=18/${lat}/${lng}`;
+        addToCompose({ type: 'location', data: { address: `纬度:${lat.toFixed(6)}, 经度:${lng.toFixed(6)}`, mapUrl: mapUrl, lat: lat, lng: lng } });
+      }
+    },
+    (err) => {
+      showToast('定位失败: ' + err.message, false);
+    }
+  );
+}
+
+// ================== 表情包选择器（带遮罩，可关闭） ==================
+function showEmojiPicker(){
+  const mask = document.createElement('div');
+  mask.className = 'emoji-picker-mask';
+  const container = document.createElement('div');
+  container.className = 'emoji-picker-container';
+  
+  const title = document.createElement('div');
+  title.style.display = 'flex';
+  title.style.justifyContent = 'space-between';
+  title.style.alignItems = 'center';
+  title.style.marginBottom = '16px';
+  title.innerHTML = '<span style="font-weight:bold;color:#ff8da1">选择表情包</span><button id="closeEmojiPicker" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button>';
+  container.appendChild(title);
+  
+  const grid = document.createElement('div');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+  grid.style.gap = '12px';
+  grid.style.marginBottom = '16px';
+  
+  const emojis = ['😘', '❤️', '🥰', '😭', '😂', '🤣', '😍', '🎉', '💕', '🐶', '🌸', '✨', '😎', '💪', '🎂', '🌹'];
+  emojis.forEach(emo => {
+    const btn = document.createElement('button');
+    btn.textContent = emo;
+    btn.style.fontSize = '32px';
+    btn.style.background = '#f9f0f4';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '60px';
+    btn.style.padding = '8px';
+    btn.style.cursor = 'pointer';
+    btn.onclick = () => {
+      addToCompose({ type: 'sticker', data: { emoji: emo } });
+      mask.remove();
+    };
+    grid.appendChild(btn);
+  });
+  container.appendChild(grid);
+  
+  const uploadBtn = document.createElement('button');
+  uploadBtn.innerHTML = '📁 上传图片';
+  uploadBtn.style.background = '#ff8da1';
+  uploadBtn.style.color = 'white';
+  uploadBtn.style.border = 'none';
+  uploadBtn.style.borderRadius = '40px';
+  uploadBtn.style.padding = '10px';
+  uploadBtn.style.fontSize = '14px';
+  uploadBtn.style.width = '100%';
+  uploadBtn.style.cursor = 'pointer';
+  uploadBtn.onclick = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if(file && file.size <= 1*1024*1024){
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          addToCompose({ type: 'sticker', data: { url: ev.target.result } });
+          mask.remove();
+        };
+        reader.readAsDataURL(file);
+      } else showToast('表情包图片请小于1MB', false);
+    };
+    input.click();
+  };
+  container.appendChild(uploadBtn);
+  
+  mask.appendChild(container);
+  mask.addEventListener('click', (e) => { if(e.target === mask) mask.remove(); });
+  mask.querySelector('#closeEmojiPicker').addEventListener('click', () => mask.remove());
+  document.body.appendChild(mask);
+}
+
+// ================== 面板控制 ==================
+const plusBtn = document.getElementById('plusBtn');
+const attachPanel = document.getElementById('attachPanel');
+plusBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  attachPanel.style.display = attachPanel.style.display === 'flex' ? 'none' : 'flex';
+});
+document.addEventListener('click', function(e){
+  if(attachPanel.style.display === 'flex' && !attachPanel.contains(e.target) && e.target !== plusBtn){
+    attachPanel.style.display = 'none';
+  }
+});
+document.getElementById('btnImage').addEventListener('click', ()=>{ selectImages(); attachPanel.style.display='none'; });
+document.getElementById('btnVideo').addEventListener('click', ()=>{ selectVideos(); attachPanel.style.display='none'; });
+document.getElementById('btnLocation').addEventListener('click', ()=>{ getLocation(); attachPanel.style.display='none'; });
+document.getElementById('btnFile').addEventListener('click', ()=>{ selectFiles(); attachPanel.style.display='none'; });
+document.getElementById('sendBtn').addEventListener('click', onSendClick);
+document.getElementById('messageInput').addEventListener('keypress', (e)=>{ if(e.key === 'Enter') onSendClick(); });
+document.getElementById('emojiBtn').addEventListener('click', ()=>{ showEmojiPicker(); });
+document.getElementById('clearComposeBtn').addEventListener('click', clearCompose);
+
 window.onload = () => {
-  renderCollects();
+  renderMessages();
+  scrollToBottom();
 };
 </script>
 </body>
